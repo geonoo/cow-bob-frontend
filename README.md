@@ -36,17 +36,24 @@ npm install
 **중요**: 이 프로젝트는 환경 설정을 별도의 private 저장소에서 관리합니다.
 
 ```bash
-# Private 저장소 클론 (별도 디렉토리에)
+# Private 저장소 클론 (동일한 상위 디렉토리에)
+cd ..
 git clone https://github.com/YOUR_USERNAME/cow-bob-private.git
+cd cow-bob-frontend
 
-# 환경 설정 파일 복사
-cp ../cow-bob-private/frontend.env ./.env.local
+# 심볼릭 링크 생성
+ln -sf ../cow-bob-private/frontend.env .env.local
 ```
 
-또는 수동으로 `.env.local` 파일을 생성하세요:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8080
-NODE_ENV=development
+**디렉토리 구조:**
+```
+your-project/
+├── cow-bob-backend/     # 백엔드 저장소
+├── cow-bob-frontend/    # 이 저장소
+└── cow-bob-private/     # Private 저장소
+    ├── backend.env
+    ├── frontend.env
+    └── data/
 ```
 
 ### 5. 개발 서버 실행
