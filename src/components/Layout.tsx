@@ -8,7 +8,6 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const navigation = [
     { name: '대시보드', href: '/', icon: '📊' },
@@ -21,73 +20,110 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 모바일 오버레이 */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
+    <div className="d-flex" style={{ minHeight: '100vh' }}>
       {/* 사이드바 */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
-          <h1 className="text-lg font-bold text-gray-900">물류 배차 시스템</h1>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
-          >
-            ✕
-          </button>
+      <nav className="bg-primary text-white" style={{ width: '280px', minHeight: '100vh' }}>
+        <div className="p-4 border-bottom border-light">
+          <h4 className="mb-0 text-center fw-bold">🚛 물류 배차 시스템</h4>
         </div>
-        <nav className="mt-8">
-          <div className="space-y-1 px-4">
+        
+        <div className="p-3">
+          <ul className="nav nav-pills flex-column">
             {navigation.map((item) => {
               const isActive = router.pathname === item.href;
               return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                >
-                  <span className="mr-3 text-lg">{item.icon}</span>
-                  {item.name}
-                </Link>
+                <li key={item.name} className="nav-item mb-2">
+                  <Link
+                    href={item.href}
+                    className={`nav-link d-flex align-items-center rounded-3 ${
+                      isActive 
+                        ? 'active bg-light text-primary fw-bold' 
+                        : 'text-white-50 hover-bg-light'
+                    }`}
+                    style={{ 
+                      transition: 'all 0.3s ease',
+                      padding: '12px 16px'
+                    }}
+                  >
+                    <span className="me-3 fs-5">{item.icon}</span>
+                    <span>{item.name}</span>
+                  </Link>
+                </li>
               );
             })}
-          </div>
-        </nav>
-      </div>
+          </ul>
+        </div>
+      </nav>
 
       {/* 메인 콘텐츠 */}
-      <div className="lg:pl-64">
-        {/* 모바일 헤더 */}
-        <div className="lg:hidden bg-white shadow-sm border-b border-gray-200">
-          <div className="flex items-center justify-between px-4 py-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-md text-gray-400 hover:text-gray-600"
+      <div className="flex-grow-1 bg-light">
+        {/* 상단 네비게이션 바 */}
+        <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom">
+          <div className="container-fluid">
+            <button 
+              className="navbar-toggler d-lg-none" 
+              type="button" 
+              data-bs-toggle="offcanvas" 
+              data-bs-target="#sidebarOffcanvas"
             >
-              ☰
+              <span className="navbar-toggler-icon"></span>
             </button>
-            <h1 className="text-lg font-semibold text-gray-900">물류 배차 시스템</h1>
-            <div className="w-10"></div>
+            
+            <div className="navbar-nav ms-auto">
+              <div className="nav-item dropdown">
+                <a className="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                  <i className="bi bi-person-circle me-2"></i>
+                  관리자
+                </a>
+                <ul className="dropdown-menu dropdown-menu-end">
+                  <li><a className="dropdown-item" href="#">프로필</a></li>
+                  <li><a className="dropdown-item" href="#">설정</a></li>
+                  <li><hr className="dropdown-divider" /></li>
+                  <li><a className="dropdown-item" href="#">로그아웃</a></li>
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
+        </nav>
 
-        <main className="py-4 lg:py-8">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* 메인 콘텐츠 영역 */}
+        <main className="p-4">
+          <div className="container-fluid">
             {children}
           </div>
         </main>
+      </div>
+
+      {/* 모바일 오프캔버스 사이드바 */}
+      <div className="offcanvas offcanvas-start bg-primary text-white" tabIndex={-1} id="sidebarOffcanvas">
+        <div className="offcanvas-header border-bottom border-light">
+          <h5 className="offcanvas-title text-white fw-bold">🚛 물류 배차 시스템</h5>
+          <button type="button" className="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div className="offcanvas-body p-3">
+          <ul className="nav nav-pills flex-column">
+            {navigation.map((item) => {
+              const isActive = router.pathname === item.href;
+              return (
+                <li key={item.name} className="nav-item mb-2">
+                  <Link
+                    href={item.href}
+                    className={`nav-link d-flex align-items-center rounded-3 ${
+                      isActive 
+                        ? 'active bg-light text-primary fw-bold' 
+                        : 'text-white-50'
+                    }`}
+                    style={{ padding: '12px 16px' }}
+                    data-bs-dismiss="offcanvas"
+                  >
+                    <span className="me-3 fs-5">{item.icon}</span>
+                    <span>{item.name}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
     </div>
   );

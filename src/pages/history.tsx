@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import Button from '../components/Button';
 import { deliveryApi, driverApi } from '../services/apiClient';
 import { Driver, Delivery } from '../types';
 
@@ -74,180 +75,220 @@ const HistoryPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">과거 배송 데이터 입력</h1>
-          <p className="mt-2 text-gray-600">완료된 배송 기록을 시스템에 추가합니다</p>
-        </div>
+      <div className="container-fluid">
+        <div className="row justify-content-center">
+          <div className="col-12 col-lg-8">
+            {/* 페이지 헤더 */}
+            <div className="text-center mb-4">
+              <h1 className="display-4 fw-bold text-primary mb-3">📋 과거 배송 데이터 입력</h1>
+              <p className="lead text-muted">완료된 배송 기록을 시스템에 추가합니다</p>
+            </div>
 
-        {message && (
-          <div className={`p-4 rounded-md ${
-            message.includes('성공') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-          }`}>
-            {message}
+            {/* 알림 메시지 */}
+            {message && (
+              <div className={`alert ${
+                message.includes('성공') ? 'alert-success' : 'alert-danger'
+              } alert-dismissible fade show`} role="alert">
+                <i className={`bi ${message.includes('성공') ? 'bi-check-circle' : 'bi-exclamation-triangle'} me-2`}></i>
+                {message}
+                <button type="button" className="btn-close" onClick={() => setMessage('')}></button>
+              </div>
+            )}
+
+            {/* 입력 폼 */}
+            <div className="card shadow-sm">
+              <div className="card-header bg-primary text-white">
+                <h5 className="card-title mb-0">
+                  <i className="bi bi-plus-circle me-2"></i>
+                  배송 데이터 입력
+                </h5>
+              </div>
+              <div className="card-body">
+                <form onSubmit={handleSubmit}>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <i className="bi bi-geo-alt me-1"></i>
+                        배송지 *
+                      </label>
+                      <input
+                        type="text"
+                        name="destination"
+                        className="form-control"
+                        value={formData.destination}
+                        onChange={handleChange}
+                        required
+                        placeholder="배송지명을 입력하세요"
+                      />
+                    </div>
+
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <i className="bi bi-calendar me-1"></i>
+                        배송일 *
+                      </label>
+                      <input
+                        type="date"
+                        name="deliveryDate"
+                        className="form-control"
+                        value={formData.deliveryDate}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="col-12">
+                      <label className="form-label">
+                        <i className="bi bi-house me-1"></i>
+                        주소 *
+                      </label>
+                      <input
+                        type="text"
+                        name="address"
+                        className="form-control"
+                        value={formData.address}
+                        onChange={handleChange}
+                        required
+                        placeholder="상세 주소를 입력하세요"
+                      />
+                    </div>
+
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <i className="bi bi-truck me-1"></i>
+                        사료량 (톤) *
+                      </label>
+                      <div className="input-group">
+                        <input
+                          type="number"
+                          name="feedTonnage"
+                          className="form-control"
+                          value={formData.feedTonnage}
+                          onChange={handleChange}
+                          required
+                          step="0.1"
+                          min="0"
+                          placeholder="0.0"
+                        />
+                        <span className="input-group-text">톤</span>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <i className="bi bi-currency-dollar me-1"></i>
+                        가격 (원) *
+                      </label>
+                      <div className="input-group">
+                        <input
+                          type="number"
+                          name="price"
+                          className="form-control"
+                          value={formData.price}
+                          onChange={handleChange}
+                          required
+                          min="0"
+                          placeholder="0"
+                        />
+                        <span className="input-group-text">원</span>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <i className="bi bi-person me-1"></i>
+                        담당 기사 *
+                      </label>
+                      <select
+                        name="driverId"
+                        className="form-select"
+                        value={formData.driverId}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">기사를 선택하세요</option>
+                        {drivers.map((driver) => (
+                          <option key={driver.id} value={driver.id}>
+                            {driver.name} ({driver.vehicleNumber})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        <i className="bi bi-check-circle me-1"></i>
+                        상태
+                      </label>
+                      <select
+                        name="status"
+                        className="form-select"
+                        value={formData.status}
+                        onChange={handleChange}
+                      >
+                        <option value="COMPLETED">완료</option>
+                        <option value="CANCELLED">취소</option>
+                      </select>
+                    </div>
+
+                    <div className="col-12">
+                      <label className="form-label">
+                        <i className="bi bi-chat-text me-1"></i>
+                        메모
+                      </label>
+                      <textarea
+                        name="notes"
+                        className="form-control"
+                        value={formData.notes}
+                        onChange={handleChange}
+                        rows={3}
+                        placeholder="추가 메모가 있으면 입력하세요"
+                      />
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div className="card-footer bg-light">
+                <div className="d-grid gap-2 d-md-flex justify-content-md-center">
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-lg"
+                    disabled={loading}
+                    onClick={handleSubmit}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                        등록 중...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-check-circle me-2"></i>
+                        배송 데이터 등록
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => setFormData({
+                      destination: '',
+                      address: '',
+                      price: '',
+                      feedTonnage: '',
+                      deliveryDate: '',
+                      driverId: '',
+                      status: 'COMPLETED',
+                      notes: ''
+                    })}
+                  >
+                    <i className="bi bi-arrow-clockwise me-2"></i>
+                    초기화
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-
-        <div className="bg-white shadow rounded-lg">
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  배송지 *
-                </label>
-                <input
-                  type="text"
-                  name="destination"
-                  value={formData.destination}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="배송지명을 입력하세요"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  배송일 *
-                </label>
-                <input
-                  type="date"
-                  name="deliveryDate"
-                  value={formData.deliveryDate}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                주소 *
-              </label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="상세 주소를 입력하세요"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  사료량 (톤) *
-                </label>
-                <input
-                  type="number"
-                  name="feedTonnage"
-                  value={formData.feedTonnage}
-                  onChange={handleChange}
-                  required
-                  step="0.1"
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0.0"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  가격 (원) *
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  담당 기사 *
-                </label>
-                <select
-                  name="driverId"
-                  value={formData.driverId}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">기사를 선택하세요</option>
-                  {drivers.map((driver) => (
-                    <option key={driver.id} value={driver.id}>
-                      {driver.name} ({driver.vehicleNumber})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  상태
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="COMPLETED">완료</option>
-                  <option value="CANCELLED">취소</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                메모
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="추가 메모가 있으면 입력하세요"
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {loading ? '등록 중...' : '배송 데이터 등록'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({
-                  destination: '',
-                  address: '',
-                  price: '',
-                  feedTonnage: '',
-                  deliveryDate: '',
-                  driverId: '',
-                  status: 'COMPLETED',
-                  notes: ''
-                })}
-                className="flex-1 sm:flex-none bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              >
-                초기화
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </Layout>
