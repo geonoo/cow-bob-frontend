@@ -16,6 +16,7 @@ export interface Delivery {
   destination: string;
   address: string;
   price: number;
+  feedTonnage: number;
   deliveryDate: string;
   driver?: Driver;
   status: 'PENDING' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';

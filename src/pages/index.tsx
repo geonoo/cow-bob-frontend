@@ -63,7 +63,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* 통계 카드 */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
@@ -133,20 +133,26 @@ const Dashboard: React.FC = () => {
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">최근 배송</h3>
-            <div className="overflow-hidden">
+            <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       배송지
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                      사료량
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                      가격
+                    </th>
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       기사
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       상태
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       배송일
                     </th>
                   </tr>
@@ -154,13 +160,26 @@ const Dashboard: React.FC = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {recentDeliveries.map((delivery) => (
                     <tr key={delivery.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {delivery.destination}
+                      <td className="px-3 py-4 text-sm font-medium text-gray-900">
+                        <div className="truncate max-w-32 sm:max-w-none">
+                          {delivery.destination}
+                        </div>
+                        <div className="text-xs text-gray-500 sm:hidden">
+                          {delivery.feedTonnage}톤 · {delivery.price.toLocaleString()}원
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {delivery.driver?.name || '미배정'}
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
+                        {delivery.feedTonnage}톤
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
+                        {delivery.price.toLocaleString()}원
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="truncate max-w-20 sm:max-w-none">
+                          {delivery.driver?.name || '미배정'}
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           delivery.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
                           delivery.status === 'ASSIGNED' ? 'bg-blue-100 text-blue-800' :
@@ -170,7 +189,7 @@ const Dashboard: React.FC = () => {
                            delivery.status === 'ASSIGNED' ? '배정됨' : '대기'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                         {new Date(delivery.deliveryDate).toLocaleDateString('ko-KR')}
                       </td>
                     </tr>
