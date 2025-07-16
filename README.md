@@ -23,7 +23,7 @@
 
 ### 2. 프로젝트 클론
 ```bash
-git clone <repository-url>
+git clone https://github.com/YOUR_USERNAME/cow-bob-frontend.git
 cd cow-bob-frontend
 ```
 
@@ -32,10 +32,21 @@ cd cow-bob-frontend
 npm install
 ```
 
-### 4. 환경 변수 설정
-`.env.local` 파일을 생성하고 다음 내용을 추가하세요:
+### 4. 🔐 Private 설정 파일 설정
+**중요**: 이 프로젝트는 환경 설정을 별도의 private 저장소에서 관리합니다.
+
+```bash
+# Private 저장소 클론 (별도 디렉토리에)
+git clone https://github.com/YOUR_USERNAME/cow-bob-private.git
+
+# 환경 설정 파일 복사
+cp ../cow-bob-private/frontend.env ./.env.local
+```
+
+또는 수동으로 `.env.local` 파일을 생성하세요:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8080
+NODE_ENV=development
 ```
 
 ### 5. 개발 서버 실행
