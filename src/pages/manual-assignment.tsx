@@ -167,15 +167,33 @@ const ManualAssignmentPage: React.FC = () => {
                               </div>
                             </div>
                             <button
-                              className="btn btn-outline-primary btn-sm"
+                              className="btn btn-outline-info btn-sm shadow-sm"
+                              style={{
+                                borderRadius: '20px',
+                                borderWidth: '2px',
+                                transition: 'all 0.3s ease'
+                              }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedDelivery(delivery);
                                 getRecommendation(delivery);
                               }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'scale(1.05)';
+                                e.target.style.backgroundColor = '#17a2b8';
+                                e.target.style.color = '#fff';
+                                e.target.style.boxShadow = '0 4px 12px rgba(23, 162, 184, 0.3)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'scale(1)';
+                                e.target.style.backgroundColor = 'transparent';
+                                e.target.style.color = '#17a2b8';
+                                e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                              }}
+                              title="AI 추천 기사"
                             >
                               <i className="bi bi-robot me-1"></i>
-                              추천
+                              🤖 추천
                             </button>
                           </div>
                         </div>
@@ -222,19 +240,34 @@ const ManualAssignmentPage: React.FC = () => {
 
                     {/* 기사 선택 */}
                     <div className="mb-4">
-                      <label className="form-label">
-                        <i className="bi bi-person me-1"></i>
+                      <label className="form-label fw-semibold text-dark">
+                        <i className="bi bi-person-fill text-primary me-2"></i>
                         배정할 기사 선택
                       </label>
                       <select
-                        className="form-select"
+                        className="form-select form-select-lg shadow-sm border-2"
+                        style={{ 
+                          borderColor: '#e3f2fd',
+                          backgroundColor: '#fafafa',
+                          transition: 'all 0.3s ease'
+                        }}
                         value={selectedDriver}
                         onChange={(e) => setSelectedDriver(e.target.value)}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#2196f3';
+                          e.target.style.backgroundColor = '#ffffff';
+                          e.target.style.boxShadow = '0 0 0 0.2rem rgba(33, 150, 243, 0.25)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = '#e3f2fd';
+                          e.target.style.backgroundColor = '#fafafa';
+                          e.target.style.boxShadow = 'none';
+                        }}
                       >
-                        <option value="">기사를 선택하세요</option>
+                        <option value="">🚛 기사를 선택하세요</option>
                         {availableDrivers.map((driver) => (
                           <option key={driver.id} value={driver.id}>
-                            {driver.name} ({driver.vehicleNumber}) - {driver.tonnage}톤
+                            👨‍💼 {driver.name} ({driver.vehicleNumber}) - {driver.tonnage}톤
                           </option>
                         ))}
                       </select>
@@ -243,19 +276,40 @@ const ManualAssignmentPage: React.FC = () => {
                     {/* 배차 확정 버튼 */}
                     <div className="d-grid">
                       <button
-                        className="btn btn-primary btn-lg"
+                        className="btn btn-primary btn-lg shadow-sm"
+                        style={{
+                          borderRadius: '25px',
+                          background: assigning ? '#6c757d' : 'linear-gradient(45deg, #007bff, #0056b3)',
+                          border: 'none',
+                          transition: 'all 0.3s ease',
+                          padding: '12px 24px'
+                        }}
                         onClick={handleAssign}
                         disabled={!selectedDriver || assigning}
+                        onMouseEnter={(e) => {
+                          if (!assigning && selectedDriver) {
+                            e.target.style.transform = 'translateY(-2px)';
+                            e.target.style.boxShadow = '0 6px 20px rgba(0,123,255,0.4)';
+                            e.target.style.background = 'linear-gradient(45deg, #0056b3, #004085)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!assigning && selectedDriver) {
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                            e.target.style.background = 'linear-gradient(45deg, #007bff, #0056b3)';
+                          }
+                        }}
                       >
                         {assigning ? (
                           <>
                             <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                            배차 중...
+                            ⏳ 배차 처리 중...
                           </>
                         ) : (
                           <>
-                            <i className="bi bi-check-circle me-2"></i>
-                            배차 확정
+                            <i className="bi bi-check-circle-fill me-2"></i>
+                            🎯 배차 확정
                           </>
                         )}
                       </button>
