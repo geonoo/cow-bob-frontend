@@ -22,22 +22,30 @@ const AssignmentsPage: React.FC = () => {
 
   const fetchDeliveries = async () => {
     try {
+      console.log('배송 목록 요청');
       const response = await deliveryApi.getPending();
+      console.log('배송 목록 응답:', response);
       setDeliveries(response.data);
     } catch (error: any) {
-      console.error('배송 목록 로딩 실패:', error);
-      const message = error.response?.data?.message || '배송 목록을 불러오는데 실패했습니다.';
+      console.error('배송 목록 로딩 실패 상세:', error);
+      console.error('배송 목록 로딩 실패 응답:', error.response);
+      console.error('배송 목록 로딩 실패 데이터:', error.response?.data);
+      const message = error.response?.data?.message || error.message || '배송 목록을 불러오는데 실패했습니다.';
       showError('배송 목록 로딩 실패', message);
     }
   };
 
   const fetchDrivers = async () => {
     try {
+      console.log('기사 목록 요청');
       const response = await driverApi.getActive();
+      console.log('기사 목록 응답:', response);
       setDrivers(response.data);
     } catch (error: any) {
-      console.error('기사 목록 로딩 실패:', error);
-      const message = error.response?.data?.message || '기사 목록을 불러오는데 실패했습니다.';
+      console.error('기사 목록 로딩 실패 상세:', error);
+      console.error('기사 목록 로딩 실패 응답:', error.response);
+      console.error('기사 목록 로딩 실패 데이터:', error.response?.data);
+      const message = error.response?.data?.message || error.message || '기사 목록을 불러오는데 실패했습니다.';
       showError('기사 목록 로딩 실패', message);
     }
   };
@@ -47,13 +55,17 @@ const AssignmentsPage: React.FC = () => {
     setMessage('');
 
     try {
-      await deliveryApi.assign(deliveryId, driverId);
+      console.log('배차 요청:', { deliveryId, driverId });
+      const response = await deliveryApi.assign(deliveryId, driverId);
+      console.log('배차 응답:', response);
       setMessage('배차가 성공적으로 완료되었습니다.');
       fetchDeliveries();
     } catch (error: any) {
-      const message = error.response?.data?.message || '배차 중 오류가 발생했습니다.';
+      console.error('배차 실패 상세:', error);
+      console.error('배차 실패 응답:', error.response);
+      console.error('배차 실패 데이터:', error.response?.data);
+      const message = error.response?.data?.message || error.message || '배차 중 오류가 발생했습니다.';
       showError('배차 실패', message);
-      console.error('배차 실패:', error);
     } finally {
       setLoading(false);
     }
@@ -61,25 +73,33 @@ const AssignmentsPage: React.FC = () => {
 
   const handleCancelAssignment = async (deliveryId: number) => {
     try {
-      await deliveryApi.cancelAssignment(deliveryId);
+      console.log('배차 취소 요청:', { deliveryId });
+      const response = await deliveryApi.cancelAssignment(deliveryId);
+      console.log('배차 취소 응답:', response);
       setMessage('배차가 성공적으로 취소되었습니다.');
       fetchDeliveries();
     } catch (error: any) {
-      const message = error.response?.data?.message || '배차 취소 중 오류가 발생했습니다.';
+      console.error('배차 취소 실패 상세:', error);
+      console.error('배차 취소 실패 응답:', error.response);
+      console.error('배차 취소 실패 데이터:', error.response?.data);
+      const message = error.response?.data?.message || error.message || '배차 취소 중 오류가 발생했습니다.';
       showError('배차 취소 실패', message);
-      console.error('배차 취소 실패:', error);
     }
   };
 
   const handleRecommend = async (deliveryId: number) => {
     try {
-      await deliveryApi.recommendDriver(deliveryId);
+      console.log('기사 추천 요청:', { deliveryId });
+      const response = await deliveryApi.recommendDriver(deliveryId);
+      console.log('기사 추천 응답:', response);
       setMessage('기사 추천이 완료되었습니다.');
       fetchDeliveries();
     } catch (error: any) {
-      const message = error.response?.data?.message || '기사 추천 중 오류가 발생했습니다.';
+      console.error('기사 추천 실패 상세:', error);
+      console.error('기사 추천 실패 응답:', error.response);
+      console.error('기사 추천 실패 데이터:', error.response?.data);
+      const message = error.response?.data?.message || error.message || '기사 추천 중 오류가 발생했습니다.';
       showError('기사 추천 실패', message);
-      console.error('기사 추천 실패:', error);
     }
   };
 
