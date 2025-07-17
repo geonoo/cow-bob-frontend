@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { deliveryApi } from '../services/apiClient';
 import { Delivery } from '../types';
+import ErrorModal from '../components/ErrorModal';
 
 const DeliveriesPage: React.FC = () => {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
@@ -16,6 +17,7 @@ const DeliveriesPage: React.FC = () => {
     deliveryDate: '',
     notes: '',
   });
+  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
 
   useEffect(() => {
     fetchDeliveries();
@@ -34,6 +36,27 @@ const DeliveriesPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // 유효성 검사
+    if (!formData.destination.trim()) {
+      setErrorModal({ open: true, message: '배송지를 입력하세요.' });
+      return;
+    }
+    if (!formData.address.trim()) {
+      setErrorModal({ open: true, message: '주소를 입력하세요.' });
+      return;
+    }
+    if (formData.feedTonnage <= 0) {
+      setErrorModal({ open: true, message: '사료(톤)는 0보다 커야 합니다.' });
+      return;
+    }
+    if (formData.price <= 0) {
+      setErrorModal({ open: true, message: '가격은 0보다 커야 합니다.' });
+      return;
+    }
+    if (!formData.deliveryDate) {
+      setErrorModal({ open: true, message: '배송일을 선택하세요.' });
+      return;
+    }
     try {
       if (editingDelivery) {
         await deliveryApi.update(editingDelivery.id, formData);
@@ -44,6 +67,7 @@ const DeliveriesPage: React.FC = () => {
       setShowModal(false);
       resetForm();
     } catch (error) {
+      setErrorModal({ open: true, message: '배송 저장에 실패했습니다.' });
       console.error('배송 저장 실패:', error);
     }
   };
@@ -132,7 +156,7 @@ const DeliveriesPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">배송 관리</h1>
           <button
             onClick={() => setShowModal(true)}
-            className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium shadow-sm"
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-500 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-600 shadow-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             배송 추가
           </button>
@@ -198,21 +222,21 @@ const DeliveriesPage: React.FC = () => {
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <button
                         onClick={() => handleEdit(delivery)}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="px-3 py-1 rounded-lg bg-white border border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700 shadow-sm transition-all duration-150"
                       >
                         수정
                       </button>
                       {delivery.status === 'ASSIGNED' && (
                         <button
                           onClick={() => handleComplete(delivery.id)}
-                          className="text-green-600 hover:text-green-900"
+                          className="px-3 py-1 rounded-lg bg-gradient-to-r from-green-500 to-green-400 text-white hover:from-green-600 hover:to-green-500 shadow-sm transition-all duration-150"
                         >
                           완료
                         </button>
                       )}
                       <button
                         onClick={() => handleDelete(delivery.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="px-3 py-1 rounded-lg bg-gradient-to-r from-red-500 to-red-400 text-white hover:from-red-600 hover:to-red-500 shadow-sm transition-all duration-150"
                       >
                         삭제
                       </button>
@@ -239,7 +263,7 @@ const DeliveriesPage: React.FC = () => {
                       type="text"
                       value={formData.destination}
                       onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition-colors placeholder-gray-400 text-base"
                       placeholder="배송지명을 입력하세요"
                       required
                     />
@@ -250,7 +274,7 @@ const DeliveriesPage: React.FC = () => {
                       type="text"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition-colors placeholder-gray-400 text-base"
                       placeholder="배송 주소를 입력하세요"
                       required
                     />
@@ -295,7 +319,7 @@ const DeliveriesPage: React.FC = () => {
                     <textarea
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow focus:ring-2 focus:ring-blue-400 focus:border-blue-500 transition-colors placeholder-gray-400 text-base"
                       rows={3}
                       placeholder="배송 관련 메모를 입력하세요"
                     />
@@ -323,6 +347,12 @@ const DeliveriesPage: React.FC = () => {
             </div>
           </div>
         )}
+        {/* 오류 모달 */}
+        <ErrorModal
+          isOpen={errorModal.open}
+          onClose={() => setErrorModal({ open: false, message: '' })}
+          message={errorModal.message}
+        />
       </div>
     </Layout>
   );

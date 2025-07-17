@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { driverApi } from '../services/apiClient';
 import { Driver } from '../types';
+import axios from 'axios';
 
 const DriversPage: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -23,6 +24,7 @@ const DriversPage: React.FC = () => {
     tonnage: 0,
     status: 'ACTIVE',
   });
+  const [revenueModal, setRevenueModal] = useState({ open: false, driver: null, data: [], year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
 
   useEffect(() => {
     fetchDrivers();
@@ -76,6 +78,16 @@ const DriversPage: React.FC = () => {
       } catch (error) {
         console.error('기사 삭제 실패:', error);
       }
+    }
+  };
+
+  const fetchRevenue = async (driverId: number, year: number, month: number) => {
+    try {
+      const response = await axios.get(`/api/drivers/${driverId}/revenue?year=${year}&month=${month}`);
+      setRevenueModal((prev) => ({ ...prev, data: response.data }));
+    } catch (error) {
+      setRevenueModal((prev) => ({ ...prev, data: [] }));
+      alert('매출 데이터 조회 실패');
     }
   };
 
@@ -188,6 +200,17 @@ const DriversPage: React.FC = () => {
                                 <i className="bi bi-trash me-1"></i>
                                 삭제
                               </button>
+                              <button
+                                className="btn btn-outline-success btn-sm shadow-sm"
+                                onClick={() => {
+                                  setRevenueModal({ open: true, driver, data: [], year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
+                                  fetchRevenue(driver.id, new Date().getFullYear(), new Date().getMonth() + 1);
+                                }}
+                                title="월별 매출 보기"
+                              >
+                                <i className="bi bi-bar-chart me-1"></i>
+                                월별 매출
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -248,6 +271,15 @@ const DriversPage: React.FC = () => {
                       onClick={() => handleDelete(driver.id)}
                     >
                       <i className="bi bi-trash me-1"></i>삭제
+                    </button>
+                    <button
+                      className="btn btn-outline-success btn-sm"
+                      onClick={() => {
+                        setRevenueModal({ open: true, driver, data: [], year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
+                        fetchRevenue(driver.id, new Date().getFullYear(), new Date().getMonth() + 1);
+                      }}
+                    >
+                      <i className="bi bi-bar-chart me-1"></i>월별 매출
                     </button>
                   </div>
                 </div>
@@ -515,6 +547,56 @@ const DriversPage: React.FC = () => {
                     {editingDriver ? '✏️ 수정 완료' : '➕ 기사 추가'}
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 매출 모달 */}
+        {revenueModal.open && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">{revenueModal.driver?.name} 기사 월별 매출</h3>
+                <button onClick={() => setRevenueModal({ ...revenueModal, open: false })} className="text-gray-500 hover:text-gray-700">닫기</button>
+              </div>
+              <div className="flex gap-2 mb-4">
+                <select value={revenueModal.year} onChange={e => {
+                  const year = Number(e.target.value);
+                  setRevenueModal(prev => ({ ...prev, year }));
+                  fetchRevenue(revenueModal.driver.id, year, revenueModal.month);
+                }} className="border rounded px-2 py-1">
+                  {[2023, 2024].map(y => <option key={y} value={y}>{y}년</option>)}
+                </select>
+                <select value={revenueModal.month} onChange={e => {
+                  const month = Number(e.target.value);
+                  setRevenueModal(prev => ({ ...prev, month }));
+                  fetchRevenue(revenueModal.driver.id, revenueModal.year, month);
+                }} className="border rounded px-2 py-1">
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map(m => <option key={m} value={m}>{m}월</option>)}
+                </select>
+              </div>
+              <div>
+                {revenueModal.data.length === 0 ? (
+                  <div className="text-gray-500 text-center py-8">매출 데이터가 없습니다.</div>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr>
+                        <th className="border-b py-2">날짜</th>
+                        <th className="border-b py-2">매출(원)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {revenueModal.data.map((row: any) => (
+                        <tr key={row.date}>
+                          <td className="py-1 text-center">{row.date}</td>
+                          <td className="py-1 text-right">{row.amount.toLocaleString()}원</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>
