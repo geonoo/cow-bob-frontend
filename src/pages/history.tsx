@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import ErrorModal from '../components/ErrorModal';
 import Button from '../components/Button';
 import { deliveryApi, driverApi } from '../services/apiClient';
 import { Driver, Delivery } from '../types';
@@ -18,14 +19,21 @@ const HistoryPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
+
+  const showError = (title: string, message: string) => {
+    setErrorModal({ show: true, title, message });
+  };
 
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
         const response = await driverApi.getAll();
         setDrivers(response.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error('기사 목록 로딩 실패:', error);
+        const message = error.response?.data?.message || '기사 목록을 불러오는데 실패했습니다.';
+        showError('기사 목록 로딩 실패', message);
       }
     };
     fetchDrivers();
@@ -58,8 +66,9 @@ const HistoryPage: React.FC = () => {
         status: 'COMPLETED',
         notes: ''
       });
-    } catch (error) {
-      setMessage('등록 중 오류가 발생했습니다.');
+    } catch (error: any) {
+      const message = error.response?.data?.message || '등록 중 오류가 발생했습니다.';
+      showError('배송 등록 실패', message);
       console.error('배송 등록 실패:', error);
     } finally {
       setLoading(false);
@@ -453,6 +462,14 @@ const HistoryPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* 오류 모달 */}
+        <ErrorModal
+          isOpen={errorModal.show}
+          title={errorModal.title}
+          message={errorModal.message}
+          onClose={() => setErrorModal({ show: false, title: '', message: '' })}
+        />
       </div>
     </Layout>
   );

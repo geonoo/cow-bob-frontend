@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
+import ErrorModal from '../components/ErrorModal';
 import { vacationApi, driverApi } from '../services/apiClient';
 import { Vacation, Driver } from '../types';
 
@@ -14,10 +15,15 @@ const VacationsPage: React.FC = () => {
     endDate: '',
     reason: '',
   });
+  const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const showError = (title: string, message: string) => {
+    setErrorModal({ show: true, title, message });
+  };
 
   const fetchData = async () => {
     try {
@@ -29,8 +35,10 @@ const VacationsPage: React.FC = () => {
       // vacations가 배열인지 확인하고 안전하게 설정
       setVacations(Array.isArray(vacationsRes.data) ? vacationsRes.data : []);
       setDrivers(Array.isArray(driversRes.data) ? driversRes.data : []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('데이터 로딩 실패:', error);
+      const message = error.response?.data?.message || '데이터를 불러오는데 실패했습니다.';
+      showError('데이터 로딩 실패', message);
       setVacations([]);
       setDrivers([]);
     } finally {
@@ -42,7 +50,10 @@ const VacationsPage: React.FC = () => {
     e.preventDefault();
     try {
       const selectedDriver = drivers.find(d => d.id === formData.driverId);
-      if (!selectedDriver) return;
+      if (!selectedDriver) {
+        showError('입력 오류', '기사를 선택해주세요.');
+        return;
+      }
 
       const vacationData = {
         driver: selectedDriver,
@@ -56,8 +67,10 @@ const VacationsPage: React.FC = () => {
       await fetchData();
       setShowModal(false);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('휴가 신청 실패:', error);
+      const message = error.response?.data?.message || '휴가 신청에 실패했습니다.';
+      showError('휴가 신청 실패', message);
     }
   };
 
@@ -65,8 +78,10 @@ const VacationsPage: React.FC = () => {
     try {
       await vacationApi.approve(id);
       await fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('휴가 승인 실패:', error);
+      const message = error.response?.data?.message || '휴가 승인에 실패했습니다.';
+      showError('휴가 승인 실패', message);
     }
   };
 
@@ -74,8 +89,10 @@ const VacationsPage: React.FC = () => {
     try {
       await vacationApi.reject(id);
       await fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('휴가 반려 실패:', error);
+      const message = error.response?.data?.message || '휴가 반려에 실패했습니다.';
+      showError('휴가 반려 실패', message);
     }
   };
 
@@ -284,6 +301,14 @@ const VacationsPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* 오류 모달 */}
+        <ErrorModal
+          isOpen={errorModal.show}
+          title={errorModal.title}
+          message={errorModal.message}
+          onClose={() => setErrorModal({ show: false, title: '', message: '' })}
+        />
       </div>
     </Layout>
   );

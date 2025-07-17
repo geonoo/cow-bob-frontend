@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import ErrorModal from '../components/ErrorModal';
 import Button from '../components/Button';
 import { deliveryApi, driverApi } from '../services/apiClient';
 import { Driver, Delivery } from '../types';
@@ -12,10 +13,15 @@ const ManualAssignmentPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(false);
   const [message, setMessage] = useState('');
+  const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const showError = (title: string, message: string) => {
+    setErrorModal({ show: true, title, message });
+  };
 
   const fetchData = async () => {
     try {
@@ -26,16 +32,20 @@ const ManualAssignmentPage: React.FC = () => {
       
       setPendingDeliveries(pendingRes.data);
       setAvailableDrivers(driversRes.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('데이터 로딩 실패:', error);
-      setMessage('데이터 로딩 중 오류가 발생했습니다.');
+      const message = error.response?.data?.message || '데이터 로딩 중 오류가 발생했습니다.';
+      showError('데이터 로딩 실패', message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleAssign = async () => {
-    if (!selectedDelivery || !selectedDriver) return;
+    if (!selectedDelivery || !selectedDriver) {
+      showError('입력 오류', '배송과 기사를 선택해주세요.');
+      return;
+    }
 
     setAssigning(true);
     setMessage('');
@@ -50,8 +60,9 @@ const ManualAssignmentPage: React.FC = () => {
       // 선택 초기화
       setSelectedDelivery(null);
       setSelectedDriver('');
-    } catch (error) {
-      setMessage('배차 중 오류가 발생했습니다.');
+    } catch (error: any) {
+      const message = error.response?.data?.message || '배차 중 오류가 발생했습니다.';
+      showError('배차 실패', message);
       console.error('배차 실패:', error);
     } finally {
       setAssigning(false);
@@ -69,8 +80,9 @@ const ManualAssignmentPage: React.FC = () => {
       } else {
         setMessage(recommendation.message || '추천할 수 있는 기사가 없습니다.');
       }
-    } catch (error) {
-      setMessage('추천 기사 조회 중 오류가 발생했습니다.');
+    } catch (error: any) {
+      const message = error.response?.data?.message || '추천 기사 조회 중 오류가 발생했습니다.';
+      showError('추천 실패', message);
       console.error('추천 실패:', error);
     }
   };
@@ -366,6 +378,14 @@ const ManualAssignmentPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* 오류 모달 */}
+        <ErrorModal
+          isOpen={errorModal.show}
+          title={errorModal.title}
+          message={errorModal.message}
+          onClose={() => setErrorModal({ show: false, title: '', message: '' })}
+        />
       </div>
     </Layout>
   );

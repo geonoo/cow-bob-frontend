@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
+import ErrorModal from '../components/ErrorModal';
 import { deliveryApi, driverApi } from '../services/apiClient';
 import { Delivery, Driver, DeliveryRecommendation } from '../types';
 
@@ -8,10 +9,15 @@ const AssignmentsPage: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [recommendations, setRecommendations] = useState<{ [key: number]: DeliveryRecommendation }>({});
   const [loading, setLoading] = useState(true);
+  const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const showError = (title: string, message: string) => {
+    setErrorModal({ show: true, title, message });
+  };
 
   const fetchData = async () => {
     try {
@@ -44,8 +50,10 @@ const AssignmentsPage: React.FC = () => {
       });
       
       setRecommendations(recommendationsMap);
-    } catch (error) {
+    } catch (error: any) {
       console.error('데이터 로딩 실패:', error);
+      const message = error.response?.data?.message || '데이터를 불러오는데 실패했습니다.';
+      showError('데이터 로딩 실패', message);
     } finally {
       setLoading(false);
     }
@@ -55,9 +63,10 @@ const AssignmentsPage: React.FC = () => {
     try {
       await deliveryApi.assign(deliveryId, driverId);
       await fetchData(); // 데이터 새로고침
-    } catch (error) {
+    } catch (error: any) {
       console.error('배차 실패:', error);
-      alert('배차에 실패했습니다.');
+      const message = error.response?.data?.message || '배차에 실패했습니다.';
+      showError('배차 실패', message);
     }
   };
 
@@ -65,6 +74,8 @@ const AssignmentsPage: React.FC = () => {
     const recommendation = recommendations[deliveryId];
     if (recommendation?.recommendedDriver) {
       await handleAssign(deliveryId, recommendation.recommendedDriver.id);
+    } else {
+      showError('배차 실패', '추천 기사가 없습니다.');
     }
   };
 
@@ -177,6 +188,14 @@ const AssignmentsPage: React.FC = () => {
             })}
           </div>
         )}
+
+        {/* 오류 모달 */}
+        <ErrorModal
+          isOpen={errorModal.show}
+          title={errorModal.title}
+          message={errorModal.message}
+          onClose={() => setErrorModal({ show: false, title: '', message: '' })}
+        />
       </div>
     </Layout>
   );

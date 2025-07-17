@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
+import ErrorModal from '../components/ErrorModal';
 import { driverApi, deliveryApi } from '../services/apiClient';
 import { Driver, Delivery } from '../types';
 
@@ -12,6 +13,11 @@ const Dashboard: React.FC = () => {
   });
   const [recentDeliveries, setRecentDeliveries] = useState<Delivery[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
+
+  const showError = (title: string, message: string) => {
+    setErrorModal({ show: true, title, message });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,8 +40,10 @@ const Dashboard: React.FC = () => {
         });
 
         setRecentDeliveries(deliveries.slice(0, 5));
-      } catch (error) {
+      } catch (error: any) {
         console.error('데이터 로딩 실패:', error);
+        const message = error.response?.data?.message || '데이터를 불러오는데 실패했습니다.';
+        showError('데이터 로딩 실패', message);
       } finally {
         setLoading(false);
       }
@@ -239,6 +247,14 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* 오류 모달 */}
+        <ErrorModal
+          isOpen={errorModal.show}
+          title={errorModal.title}
+          message={errorModal.message}
+          onClose={() => setErrorModal({ show: false, title: '', message: '' })}
+        />
       </div>
     </Layout>
   );
