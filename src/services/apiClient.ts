@@ -25,13 +25,16 @@ export const deliveryApi = {
   getAll: () => apiClient.get('/api/deliveries'),
   getById: (id: number) => apiClient.get(`/api/deliveries/${id}`),
   create: (delivery: any) => apiClient.post('/api/deliveries', delivery),
+  createHistorical: (delivery: any) => apiClient.post('/api/deliveries/history', delivery),
   update: (id: number, delivery: any) => apiClient.put(`/api/deliveries/${id}`, delivery),
   delete: (id: number) => apiClient.delete(`/api/deliveries/${id}`),
   getPending: () => apiClient.get('/api/deliveries/pending'),
+  getAssigned: () => apiClient.get('/api/deliveries/assigned'),
   recommendDriver: (id: number) => apiClient.post(`/api/deliveries/${id}/recommend-driver`),
   assign: (deliveryId: number, driverId: number) => 
     apiClient.post(`/api/deliveries/${deliveryId}/assign/${driverId}`),
   complete: (id: number) => apiClient.post(`/api/deliveries/${id}/complete`),
+  cancelAssignment: (id: number) => apiClient.post(`/api/deliveries/${id}/cancel-assignment`),
 };
 
 // 휴가 관련 API

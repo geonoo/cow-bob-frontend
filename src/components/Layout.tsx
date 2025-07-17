@@ -14,6 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: '기사 관리', href: '/drivers', icon: '👨‍💼' },
     { name: '배송 관리', href: '/deliveries', icon: '📦' },
     { name: '배차 관리', href: '/assignments', icon: '🚛' },
+    { name: '배차된 배송', href: '/assigned-deliveries', icon: '🚚' },
     { name: '직접 배차', href: '/manual-assignment', icon: '🎯' },
     { name: '과거 데이터', href: '/history', icon: '📋' },
     { name: '휴가 관리', href: '/vacations', icon: '🏖️' },

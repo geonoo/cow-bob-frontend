@@ -52,7 +52,7 @@ const HistoryPage: React.FC = () => {
         driver: formData.driverId ? { id: parseInt(formData.driverId) } : null
       };
 
-      await deliveryApi.create(deliveryData);
+      await deliveryApi.createHistorical(deliveryData);
       setMessage('과거 배송 데이터가 성공적으로 등록되었습니다.');
       
       // 폼 초기화
@@ -396,20 +396,22 @@ const HistoryPage: React.FC = () => {
                     }}
                     disabled={loading}
                     onClick={handleSubmit}
-                    onMouseEnter={(e) => {
-                      if (!loading) {
-                        e.target.style.transform = 'translateY(-2px)';
-                        e.target.style.boxShadow = '0 6px 20px rgba(40, 167, 69, 0.4)';
-                        e.target.style.background = 'linear-gradient(45deg, #20c997, #17a2b8)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!loading) {
-                        e.target.style.transform = 'translateY(0)';
-                        e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                        e.target.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
-                      }
-                    }}
+                                            onMouseEnter={(e) => {
+                          if (!loading) {
+                            const target = e.target as HTMLButtonElement;
+                            target.style.transform = 'translateY(-2px)';
+                            target.style.boxShadow = '0 6px 20px rgba(40, 167, 69, 0.4)';
+                            target.style.background = 'linear-gradient(45deg, #20c997, #17a2b8)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!loading) {
+                            const target = e.target as HTMLButtonElement;
+                            target.style.transform = 'translateY(0)';
+                            target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                            target.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+                          }
+                        }}
                   >
                     {loading ? (
                       <>
@@ -442,16 +444,18 @@ const HistoryPage: React.FC = () => {
                       notes: ''
                     })}
                     onMouseEnter={(e) => {
-                      e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 4px 12px rgba(255, 193, 7, 0.3)';
-                      e.target.style.backgroundColor = '#ffc107';
-                      e.target.style.color = '#000';
+                      const target = e.target as HTMLButtonElement;
+                      target.style.transform = 'translateY(-2px)';
+                      target.style.boxShadow = '0 4px 12px rgba(255, 193, 7, 0.3)';
+                      target.style.backgroundColor = '#ffc107';
+                      target.style.color = '#000';
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                      e.target.style.backgroundColor = 'transparent';
-                      e.target.style.color = '#ffc107';
+                      const target = e.target as HTMLButtonElement;
+                      target.style.transform = 'translateY(0)';
+                      target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                      target.style.backgroundColor = 'transparent';
+                      target.style.color = '#ffc107';
                     }}
                   >
                     <i className="bi bi-arrow-clockwise me-2"></i>
