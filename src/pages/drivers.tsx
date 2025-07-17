@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
+import ErrorModal from '../components/ErrorModal';
 import { driverApi } from '../services/apiClient';
 import { Driver } from '../types';
 import axios from 'axios';
@@ -24,18 +25,25 @@ const DriversPage: React.FC = () => {
     tonnage: 0,
     status: 'ACTIVE',
   });
-  const [revenueModal, setRevenueModal] = useState({ open: false, driver: null, data: [], year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
+  const [revenueModal, setRevenueModal] = useState({ open: false, driver: null as Driver | null, data: [], year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
+  const [errorModal, setErrorModal] = useState({ show: false, message: '', title: '' });
 
   useEffect(() => {
     fetchDrivers();
   }, []);
 
+  const showError = (title: string, message: string) => {
+    setErrorModal({ show: true, title, message });
+  };
+
   const fetchDrivers = async () => {
     try {
       const response = await driverApi.getAll();
       setDrivers(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('기사 목록 로딩 실패:', error);
+      const message = error.response?.data?.message || '기사 목록을 불러오는데 실패했습니다.';
+      showError('기사 목록 로딩 실패', message);
     } finally {
       setLoading(false);
     }
@@ -52,8 +60,10 @@ const DriversPage: React.FC = () => {
       await fetchDrivers();
       setShowModal(false);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('기사 저장 실패:', error);
+      const message = error.response?.data?.message || '기사 정보 저장에 실패했습니다.';
+      showError('기사 저장 실패', message);
     }
   };
 
@@ -75,8 +85,10 @@ const DriversPage: React.FC = () => {
       try {
         await driverApi.delete(id);
         await fetchDrivers();
-      } catch (error) {
+      } catch (error: any) {
         console.error('기사 삭제 실패:', error);
+        const message = error.response?.data?.message || '기사 삭제에 실패했습니다.';
+        showError('기사 삭제 실패', message);
       }
     }
   };
@@ -85,9 +97,10 @@ const DriversPage: React.FC = () => {
     try {
       const response = await axios.get(`/api/drivers/${driverId}/revenue?year=${year}&month=${month}`);
       setRevenueModal((prev) => ({ ...prev, data: response.data }));
-    } catch (error) {
+    } catch (error: any) {
       setRevenueModal((prev) => ({ ...prev, data: [] }));
-      alert('매출 데이터 조회 실패');
+      const message = error.response?.data?.message || '매출 데이터 조회에 실패했습니다.';
+      showError('매출 조회 실패', message);
     }
   };
 
@@ -601,6 +614,14 @@ const DriversPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* 오류 모달 */}
+        <ErrorModal
+          isOpen={errorModal.show}
+          title={errorModal.title}
+          message={errorModal.message}
+          onClose={() => setErrorModal({ show: false, title: '', message: '' })}
+        />
       </div>
     </Layout>
   );

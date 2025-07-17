@@ -17,18 +17,24 @@ const DeliveriesPage: React.FC = () => {
     deliveryDate: '',
     notes: '',
   });
-  const [errorModal, setErrorModal] = useState({ open: false, message: '' });
+  const [errorModal, setErrorModal] = useState({ show: false, title: '', message: '' });
 
   useEffect(() => {
     fetchDeliveries();
   }, []);
 
+  const showError = (title: string, message: string) => {
+    setErrorModal({ show: true, title, message });
+  };
+
   const fetchDeliveries = async () => {
     try {
       const response = await deliveryApi.getAll();
       setDeliveries(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('배송 목록 로딩 실패:', error);
+      const message = error.response?.data?.message || '배송 목록을 불러오는데 실패했습니다.';
+      showError('배송 목록 로딩 실패', message);
     } finally {
       setLoading(false);
     }
@@ -38,23 +44,23 @@ const DeliveriesPage: React.FC = () => {
     e.preventDefault();
     // 유효성 검사
     if (!formData.destination.trim()) {
-      setErrorModal({ open: true, message: '배송지를 입력하세요.' });
+      showError('입력 오류', '배송지를 입력하세요.');
       return;
     }
     if (!formData.address.trim()) {
-      setErrorModal({ open: true, message: '주소를 입력하세요.' });
+      showError('입력 오류', '주소를 입력하세요.');
       return;
     }
     if (formData.feedTonnage <= 0) {
-      setErrorModal({ open: true, message: '사료(톤)는 0보다 커야 합니다.' });
+      showError('입력 오류', '사료(톤)는 0보다 커야 합니다.');
       return;
     }
     if (formData.price <= 0) {
-      setErrorModal({ open: true, message: '가격은 0보다 커야 합니다.' });
+      showError('입력 오류', '가격은 0보다 커야 합니다.');
       return;
     }
     if (!formData.deliveryDate) {
-      setErrorModal({ open: true, message: '배송일을 선택하세요.' });
+      showError('입력 오류', '배송일을 선택하세요.');
       return;
     }
     try {
@@ -66,8 +72,9 @@ const DeliveriesPage: React.FC = () => {
       await fetchDeliveries();
       setShowModal(false);
       resetForm();
-    } catch (error) {
-      setErrorModal({ open: true, message: '배송 저장에 실패했습니다.' });
+    } catch (error: any) {
+      const message = error.response?.data?.message || '배송 저장에 실패했습니다.';
+      showError('배송 저장 실패', message);
       console.error('배송 저장 실패:', error);
     }
   };
@@ -90,8 +97,10 @@ const DeliveriesPage: React.FC = () => {
       try {
         await deliveryApi.delete(id);
         await fetchDeliveries();
-      } catch (error) {
+      } catch (error: any) {
         console.error('배송 삭제 실패:', error);
+        const message = error.response?.data?.message || '배송 삭제에 실패했습니다.';
+        showError('배송 삭제 실패', message);
       }
     }
   };
@@ -100,8 +109,10 @@ const DeliveriesPage: React.FC = () => {
     try {
       await deliveryApi.complete(id);
       await fetchDeliveries();
-    } catch (error) {
+    } catch (error: any) {
       console.error('배송 완료 처리 실패:', error);
+      const message = error.response?.data?.message || '배송 완료 처리에 실패했습니다.';
+      showError('배송 완료 처리 실패', message);
     }
   };
 
@@ -349,9 +360,10 @@ const DeliveriesPage: React.FC = () => {
         )}
         {/* 오류 모달 */}
         <ErrorModal
-          isOpen={errorModal.open}
-          onClose={() => setErrorModal({ open: false, message: '' })}
+          isOpen={errorModal.show}
+          title={errorModal.title}
           message={errorModal.message}
+          onClose={() => setErrorModal({ show: false, title: '', message: '' })}
         />
       </div>
     </Layout>
